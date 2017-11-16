@@ -1,1 +1,86 @@
-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.wScrollFix=t()}(this,function(){"use strict";function e(e){throw new Error(e)}return function(t){var o=arguments.length>1&&void 0!==arguments[1]&&arguments[1];t=function(t){if(t)return"string"!=typeof t?t:void((t=document.querySelector(t))||e("the element selector is empty result"));e("please pass the element")}(t),o&&function(e){var t=0;new MutationObserver(function(o){o.forEach(function(){clearTimeout(t),t=setTimeout(function(){0==e.scrollTop&&(e.scrollTop=1)},100)})}).observe(e,{attributes:!0,childList:!0,characterData:!0,subtree:!0})}(t),function(e){e.scrollTop=1,e.addEventListener("touchstart",function(t){var o=e.scrollTop;o<=0&&(e.scrollTop=1),o+e.offsetHeight>=e.scrollHeight&&(e.scrollTop=e.scrollHeight-e.offsetHeight-1)},!1),e.addEventListener("scroll",function(e){var t=e.target;0==t.scrollTop?t.scrollTop=1:t.scrollTop+t.offsetHeight==t.scrollHeight&&(t.scrollTop=t.scrollTop-1)}),e.addEventListener("touchmove",function(e){e.currentTarget.offsetHeight<e.currentTarget.scrollHeight&&e.stopPropagation()})}(t)}});
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.wScrollFix = factory());
+}(this, (function () { 'use strict';
+
+let clearTimeoutHandler = 0;
+
+function bindContainerListLoadEvent (elem) {
+  let observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function () {
+      clearTimeout(clearTimeoutHandler);
+      clearTimeoutHandler = setTimeout(() => {
+        if (elem.scrollTop == 0) {
+          elem.scrollTop = 1;
+        }
+      }, 100);
+    });
+  });
+  observer.observe(elem, {attributes: true, childList: true, characterData: true, subtree: true});
+}
+
+
+function bindScrollFixEvent (elem) {
+
+  elem.scrollTop = 1;
+
+  elem.addEventListener('touchstart', function (event) {
+    let startTopScroll = elem.scrollTop;
+    if (startTopScroll <= 0) {
+      elem.scrollTop = 1;
+    }
+    if (startTopScroll + elem.offsetHeight >= elem.scrollHeight) {
+      elem.scrollTop = elem.scrollHeight - elem.offsetHeight - 1;
+    }
+  }, false);
+
+  elem.addEventListener("scroll", e => {
+      let target = e.target;
+      if (target.scrollTop == 0) {
+        target.scrollTop = 1;
+      } else if (target.scrollTop + target.offsetHeight == target.scrollHeight) {
+        target.scrollTop = target.scrollTop - 1;
+      }
+    }
+  );
+
+  elem.addEventListener("touchmove", e => {
+    if (e.currentTarget.offsetHeight < e.currentTarget.scrollHeight) {
+      e.stopPropagation();
+    }
+  });
+
+}
+
+function errorHandler (msg) {
+  throw new Error(msg);
+}
+
+function checkEl (elem) {
+  if (elem) {
+    if (typeof elem === "string") {
+      elem = document.querySelector(elem);
+      if (!elem) {
+        errorHandler("the element selector is empty result");
+        return void 0;
+      }
+    } else {
+      return elem;
+    }
+  } else {
+    errorHandler("please pass the element");
+    return void 0;
+  }
+}
+
+var scrollFix = function (elem, hasAsyncLoad = false) {
+  elem = checkEl(elem);
+  hasAsyncLoad && bindContainerListLoadEvent(elem);
+  bindScrollFixEvent(elem);
+};
+
+return scrollFix;
+
+})));
+//# sourceMappingURL=wScrollFix.js.map
